@@ -11,7 +11,7 @@ exports.up = (knex) => {
       table.integer('company').unsigned();
       table.foreign('company').references('companies.id');
     })
-    .table('profiles', function(table) {
+    .table('profiles', function (table) {
       table.integer('role').unsigned();
       table.foreign('role').references('roles.id');
       table.integer('company').unsigned();
@@ -25,7 +25,7 @@ exports.down = (knex) => {
       table.dropForeign('company');
       table.dropColumn('company');
       table.dropForeign('role');
-      table.dropColumn('role')
+      table.dropColumn('role');
     })
     .dropTableIfExists('roles')
     .dropTableIfExists('companies');
