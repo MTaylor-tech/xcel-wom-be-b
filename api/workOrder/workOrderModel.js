@@ -31,6 +31,9 @@ const findByUser = async (userId) => {
       db.raw(
         'ARRAY(SELECT row_to_json(images) FROM images WHERE images."workOrder" = wo.id) AS images'
       ),
+      db.raw(
+        'ARRAY(SELECT row_to_json(comments) FROM comments WHERE comments."workOrder" = wo.id) AS comments'
+      ),
       db.raw('row_to_json(u) as createdBy'),
       db.raw('row_to_json(a) as assignedTo')
     )
@@ -65,6 +68,9 @@ const findById = async (workOrderId) => {
       db.raw('row_to_json(p) as property'),
       db.raw(
         'ARRAY(SELECT row_to_json(images) FROM images WHERE images."workOrder" = wo.id) AS images'
+      ),
+      db.raw(
+        'ARRAY(SELECT row_to_json(comments) FROM comments WHERE comments."workOrder" = wo.id) AS comments'
       ),
       db.raw('row_to_json(u) as createdBy'),
       db.raw('row_to_json(a) as assignedTo')

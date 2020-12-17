@@ -46,7 +46,9 @@ const router = express.Router();
  *              description: The public URL of an image of the property
  *            company:
  *              type: integer
- *              description: This is a foreign key to Companies.id. It should point to the same company referenced above.
+ *              description:
+ *                This is a foreign key to Companies.id. It should
+ *                point to the same company referenced above.
  *        images:
  *          type: array
  *          items:
@@ -64,13 +66,31 @@ const router = express.Router();
  *                workOrder:
  *                  type: integer
  *                  description: A reference to this workOrder
+ *        comments:
+ *          type: array
+ *          items:
+ *             type: object
+ *             properties:
+ *                id:
+ *                  type: integer
+ *                  description: autoincrements
+ *                comment:
+ *                  type: string
+ *                  description: The body of the comment
+ *                user:
+ *                  type: string
+ *                  description: The userId of the user who wrote the comment
+ *                workOrder:
+ *                  type: integer
+ *                  description: A reference to this workOrder
  *        createdBy:
  *          type: string
  *          description: This is a foreign key to Profiles.id (Okta Id)
  *        assignedTo:
  *          type: string
  *          description:
- *            This is a foreign key to Profiles.id (Okta Id). By default it is set to the same user as 'createdBy'
+ *            This is a foreign key to Profiles.id (Okta Id). By default it is
+ *            set to the same user as 'createdBy'
  *        priority:
  *          type: object
  *          properties:
@@ -93,7 +113,8 @@ const router = express.Router();
  *      example:
  *        id: 1
  *        title: 'Broken Radiator Thermostat'
- *        description: 'Radiator Thermo in Apt 224 is broken. Probably needs replaced.'
+ *        description:
+ *          'Radiator Thermo in Apt 224 is broken. Probably needs replaced.'
  *        company:
  *            id: 1
  *            name: 'ACME Property Management'
@@ -105,11 +126,11 @@ const router = express.Router();
  *            company: 1
  *        images:
  *            - id: 1
- *              url: 'https://media-cdn.tripadvisor.com/media/photo-s/0f/ef/f7/2e/broken-radiator-thermostat.jpg'
+ *              url: 'http://path/to/image'
  *              user: '00ulthapbErVUwVJy4x6'
  *              workOrder: 1
  *            - id: 2
- *              url: 'https://media-cdn.tripadvisor.com/media/photo-s/0d/fa/39/a5/broken-radiator-wowowow.jpg'
+ *              url: 'http://path/to/image'
  *              user: '00ulthapbErVUwVJy4x6'
  *              workOrder: 1
  *        createdBy: '00ulthapbErVUwVJy4x6'
