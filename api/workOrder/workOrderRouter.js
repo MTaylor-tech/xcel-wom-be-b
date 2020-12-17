@@ -1,0 +1,396 @@
+const express = require('express');
+const authRequired = require('../middleware/authRequired');
+const WorkOrders = require('./workOrderModel');
+const router = express.Router();
+
+/**
+ * @swagger
+ * components:
+ *  schemas:
+ *    WorkOrder:
+ *      type: object
+ *      properties:
+ *        id:
+ *          type: integer
+ *          description: autoincrements
+ *        title:
+ *          type: string
+ *        description:
+ *          type: string
+ *          description: an explanation of what needs done
+ *        created_at:
+ *          type: timestamp
+ *        updated_at:
+ *          type: timestamp
+ *        company:
+ *          type: object
+ *          properties:
+ *            id:
+ *              type: integer
+ *              description: autoincrements
+ *            name:
+ *              type: string
+ *        property:
+ *          type: object
+ *          properties:
+ *            id:
+ *              type: integer
+ *              description: autoincrements
+ *            name:
+ *              type: string
+ *            address:
+ *              type: string
+ *              description: The physical address of the property
+ *            imageUrl:
+ *              type: string
+ *              description: The public URL of an image of the property
+ *            company:
+ *              type: integer
+ *              description: This is a foreign key to Companies.id. It should point to the same company referenced above.
+ *        images:
+ *          type: array
+ *          items:
+ *             type: object
+ *             properties:
+ *                id:
+ *                  type: integer
+ *                  description: autoincrements
+ *                url:
+ *                  type: string
+ *                  description: The public URL of the image
+ *                user:
+ *                  type: string
+ *                  description: The userId of the user who uploaded the image
+ *                workOrder:
+ *                  type: integer
+ *                  description: A reference to this workOrder
+ *        createdBy:
+ *          type: string
+ *          description: This is a foreign key to Profiles.id (Okta Id)
+ *        assignedTo:
+ *          type: string
+ *          description:
+ *            This is a foreign key to Profiles.id (Okta Id). By default it is set to the same user as 'createdBy'
+ *        priority:
+ *          type: object
+ *          properties:
+ *            id:
+ *              type: integer
+ *              description: autoincrements
+ *            name:
+ *              type: string
+ *            color:
+ *              type: string
+ *              description: This is a hex code in the form '#RRGGBB'
+ *        status:
+ *          type: object
+ *          properties:
+ *            id:
+ *              type: integer
+ *              description: autoincrements
+ *            name:
+ *              type: string
+ *      example:
+ *        id: 1
+ *        title: 'Broken Radiator Thermostat'
+ *        description: 'Radiator Thermo in Apt 224 is broken. Probably needs replaced.'
+ *        company:
+ *            id: 1
+ *            name: 'ACME Property Management'
+ *        property:
+ *            id: 1
+ *            name: 'Lot 24'
+ *            address: '2404 Railroad St, Pittsburgh, PA 15222'
+ *            imageUrl: 'https://bit.ly/3ajfoTV'
+ *            company: 1
+ *        images:
+ *            - id: 1
+ *              url: 'https://media-cdn.tripadvisor.com/media/photo-s/0f/ef/f7/2e/broken-radiator-thermostat.jpg'
+ *              user: '00ulthapbErVUwVJy4x6'
+ *              workOrder: 1
+ *            - id: 2
+ *              url: 'https://media-cdn.tripadvisor.com/media/photo-s/0d/fa/39/a5/broken-radiator-wowowow.jpg'
+ *              user: '00ulthapbErVUwVJy4x6'
+ *              workOrder: 1
+ *        createdBy: '00ulthapbErVUwVJy4x6'
+ *        assignedTo: '00ulthapbErVUwVJy4x6'
+ *        priority:
+ *            id: 2
+ *            name: 'High'
+ *            color: '#F7931B'
+ *        status:
+ *            id: 1
+ *            name: 'Unassigned'
+ *        created_at: '2020-12-15T22:46:05.962Z'
+ *        updated_at: '2020-12-15T22:46:05.962Z'
+ *
+ * /workOrders:
+ *  get:
+ *    description: Returns a list of workOrders associated with the user
+ *    summary: Get a list of workOrders created by or assigned to the user
+ *    security:
+ *      - okta: []
+ *    tags:
+ *      - workOrder
+ *    responses:
+ *      200:
+ *        description: array of workOrders
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: array
+ *              items:
+ *                $ref: '#/components/schemas/WorkOrder'
+ *      401:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      403:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ */
+router.get('/', authRequired, function (req, res) {
+  WorkOrders.findByUser(req.profile.id)
+    .then((workOrders) => {
+      res.status(200).json(workOrders);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ message: err.message });
+    });
+});
+
+/**
+ * @swagger
+ * components:
+ *  parameters:
+ *    workOrderId:
+ *      name: id
+ *      in: path
+ *      description: ID of the workOrder to return
+ *      required: true
+ *      example: 1
+ *      schema:
+ *        type: integer
+ *
+ * /workOrder/{id}:
+ *  get:
+ *    description: Find a single workOrder by ID
+ *    summary: Returns a single workOrder
+ *    security:
+ *      - okta: []
+ *    tags:
+ *      - workOrder
+ *    parameters:
+ *      - $ref: '#/components/parameters/workOrderId'
+ *    responses:
+ *      200:
+ *        description: A workOrder object
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/WorkOrder'
+ *      401:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      404:
+ *        description: 'WorkOrder not found'
+ */
+router.get('/:id', authRequired, function (req, res) {
+  const id = String(req.params.id);
+  WorkOrders.findById(id)
+    .then((workOrder) => {
+      if (workOrder) {
+        res.status(200).json(workOrder);
+      } else {
+        res.status(404).json({ error: 'WorkOrderNotFound' });
+      }
+    })
+    .catch((err) => {
+      res.status(500).json({ error: err.message });
+    });
+});
+
+router.get('/user/:id', function (req, res) {
+  const id = String(req.params.id);
+  WorkOrders.findByUser(id)
+    .then((workOrder) => {
+      if (workOrder) {
+        res.status(200).json(workOrder);
+      } else {
+        res.status(404).json({ error: 'WorkOrderNotFound' });
+      }
+    })
+    .catch((err) => {
+      res.status(500).json({ error: err.message });
+    });
+});
+
+/**
+ * @swagger
+ * /workOrder:
+ *  post:
+ *    summary: Add a workOrder
+ *    security:
+ *      - okta: []
+ *    tags:
+ *      - workOrder
+ *    requestBody:
+ *      description: WorkOrder object to to be added
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/WorkOrder'
+ *    responses:
+ *      400:
+ *        $ref: '#/components/responses/BadRequest'
+ *      401:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      404:
+ *        description: 'WorkOrder not found'
+ *      200:
+ *        description: A workOrder object
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  description: A message about the result
+ *                  example: workOrder created
+ *                workOrder:
+ *                  $ref: '#/components/schemas/WorkOrder'
+ */
+router.post('/', authRequired, async (req, res) => {
+  const workOrder = req.body;
+  if (workOrder) {
+    const id = workOrder.id || 0;
+    try {
+      await WorkOrders.findById(id).then(async (pf) => {
+        if (pf == undefined) {
+          //workOrder not found so lets insert it
+          await WorkOrders.create(workOrder).then((workOrder) =>
+            res
+              .status(200)
+              .json({ message: 'workOrder created', workOrder: workOrder[0] })
+          );
+        } else {
+          res.status(400).json({ message: 'workOrder already exists' });
+        }
+      });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ message: e.message });
+    }
+  } else {
+    res.status(404).json({ message: 'WorkOrder missing' });
+  }
+});
+/**
+ * @swagger
+ * /workOrder:
+ *  put:
+ *    summary: Update a workOrder
+ *    security:
+ *      - okta: []
+ *    tags:
+ *      - workOrder
+ *    requestBody:
+ *      description: WorkOrder object to to be updated
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/WorkOrder'
+ *    responses:
+ *      401:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      404:
+ *        $ref: '#/components/responses/NotFound'
+ *      200:
+ *        description: A workOrder object
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  description: A message about the result
+ *                  example: workOrder created
+ *                workOrder:
+ *                  $ref: '#/components/schemas/WorkOrder'
+ */
+router.put('/', authRequired, function (req, res) {
+  const workOrder = req.body;
+  if (workOrder) {
+    const id = workOrder.id || 0;
+    WorkOrders.findById(id)
+      .then(
+        WorkOrders.update(id, workOrder)
+          .then((updated) => {
+            res
+              .status(200)
+              .json({ message: 'workOrder created', workOrder: updated[0] });
+          })
+          .catch((err) => {
+            res.status(500).json({
+              message: `Could not update workOrder '${id}'`,
+              error: err.message,
+            });
+          })
+      )
+      .catch((err) => {
+        res.status(404).json({
+          message: `Could not find workOrder '${id}'`,
+          error: err.message,
+        });
+      });
+  }
+});
+/**
+ * @swagger
+ * /workOrder/{id}:
+ *  delete:
+ *    summary: Remove a workOrder
+ *    security:
+ *      - okta: []
+ *    tags:
+ *      - workOrder
+ *    parameters:
+ *      - $ref: '#/components/parameters/workOrderId'
+ *    responses:
+ *      401:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      404:
+ *        $ref: '#/components/responses/NotFound'
+ *      200:
+ *        description: A workOrder object
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  description: A message about the result
+ *                  example: WorkOrder 3 was deleted.
+ *                workOrder:
+ *                  $ref: '#/components/schemas/WorkOrder'
+ */
+router.delete('/:id', authRequired, function (req, res) {
+  const id = req.params.id;
+  try {
+    WorkOrders.findById(id).then((workOrder) => {
+      WorkOrders.remove(workOrder.id).then(() => {
+        res.status(200).json({
+          message: `WorkOrder '${id}' was deleted.`,
+          workOrder: workOrder,
+        });
+      });
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: `Could not delete workOrder with ID: ${id}`,
+      error: err.message,
+    });
+  }
+});
+
+module.exports = router;
