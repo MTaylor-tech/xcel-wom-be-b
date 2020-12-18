@@ -35,4 +35,28 @@ router.post('/:company_id/user', function (req, res) {
           res.status(500).json({ message: "Something went wrong" });
         });
 })
+
+router.put('/user/:user_id', function (req, res) {
+  updates = req.body
+  userModel.updateProfile(updates, req.params.user_id)
+      .then((user) => {
+        res.status(200).json({message: req.body, user});
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({ message: req.params });
+      });
+})
+
+router.delete("/:company_id/user/:user_id", function (req, res) {
+  userModel.deleteUser(req.params.user_id)
+    .then((user) => {
+      res.status(200).json({message: "Deleted"});
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ message: "Something went wrong" });
+    });
+})
+
 module.exports = router;

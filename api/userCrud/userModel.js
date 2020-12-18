@@ -1,24 +1,39 @@
 const db = require('../../data/db-config');
 
 const getCompanyUsers = async (id) => {
-    return await db('users')
+    return await db('profiles')
       .select()
-      .where('company_id', '=', id)    
+      .where('company', '=', id)    
   };
 
 const getCompanyUser = async (company_id, user_id) => {
-    return await db('users')
+    return await db('profiles')
       .select()
       .where('id', '=', user_id)
-      
   };
 
 const createUser = async (user) => {
-    return await db('users').insert(user)
+    return await db('profiles').insert(user)
+}
+
+const updateProfile = async (updates, userId) => {
+    return await db('profiles')
+      .where("id", "=", userId)
+      .update(
+        updates
+      )
+}
+
+const deleteUser = async (id) => {
+  return await db('profiles')
+    .where("id", "=", id)
+    .del()
 }
 
 module.exports = { 
   getCompanyUsers,
   getCompanyUser,
-  createUser
+  createUser,
+  updateProfile,
+  deleteUser
 };
