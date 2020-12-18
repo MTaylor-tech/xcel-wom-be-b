@@ -10,11 +10,15 @@ const getCompanyUser = async (company_id, user_id) => {
     return await db('users')
       .select()
       .where('id', '=', user_id)
-      .where('company_id', '=', company_id)
+      
   };
 
+const createUser = async (user) => {
+    return await db('users').insert(user)
+}
 
 module.exports = { 
   getCompanyUsers,
-  getCompanyUser
+  getCompanyUser,
+  createUser
 };
