@@ -50,7 +50,21 @@ app.use(cookieParser());
 // application routes
 app.use('/', indexRouter);
 app.use(['/profile', '/profiles'], profileRouter);
-app.use(['/workOrder', '/workOrders'], workOrderRouter);
+app.use(
+  [
+    '/workOrders?',
+    '/*/workOrders?',
+    '/*/*/workOrders?',
+    '/*/*/*/workOrders?',
+    '/*/*/*/*/workOrders?',
+    '/orders?',
+    '/*/orders?',
+    '/*/*/orders?',
+    '/*/*/*/orders?',
+    '/*/*/*/*/orders?',
+  ],
+  workOrderRouter
+);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

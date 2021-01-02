@@ -167,16 +167,30 @@ const router = express.Router();
  *      403:
  *        $ref: '#/components/responses/UnauthorizedError'
  */
-router.get('/', authRequired, function (req, res) {
-  WorkOrders.findByUser(req.profile.id)
-    .then((workOrders) => {
-      res.status(200).json(workOrders);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ message: err.message });
-    });
-});
+router.get(
+  [
+    '/',
+    '/users?/workOrders?',
+    '/users?/orders?',
+    '/users?/:id/workOrders?',
+    '/users?/:id/orders?',
+    '/company/users?/:id/workOrders?',
+    '/company/users?/:id/orders?',
+    '/company/:companyId/users?/:id/workOrders?',
+    '/company/:companyId/users?/:id/orders?',
+  ],
+  authRequired,
+  function (req, res) {
+    WorkOrders.findByUser(req.profile.id)
+      .then((workOrders) => {
+        res.status(200).json(workOrders);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({ message: err.message });
+      });
+  }
+);
 
 /**
  * @swagger
@@ -213,35 +227,98 @@ router.get('/', authRequired, function (req, res) {
  *      404:
  *        description: 'WorkOrder not found'
  */
-router.get('/:id', authRequired, function (req, res) {
-  const id = String(req.params.id);
-  WorkOrders.findById(id)
-    .then((workOrder) => {
-      if (workOrder) {
-        res.status(200).json(workOrder);
-      } else {
-        res.status(404).json({ error: 'WorkOrderNotFound' });
-      }
-    })
-    .catch((err) => {
-      res.status(500).json({ error: err.message });
-    });
-});
+router.get(
+  [
+    '/:id',
+    '/users?/workOrders?/:id',
+    '/users?/orders?/:id',
+    '/users?/:userId/workOrders?/:id',
+    '/users?/:userId/orders?/:id',
+    '/company/workOrders?/:id',
+    '/company/orders?/:id',
+    '/company/:companyId/workOrders?/:id',
+    '/company/:companyId/orders?/:id',
+    '/company/users?/:userId/workOrders?/:id',
+    '/company/users?/:userId/orders?/:id',
+    '/company/:companyId/users?/:userId/workOrders?/:id',
+    '/company/:companyId/users?/:userId/orders?/:id',
+    '/property/workOrders?/:id',
+    '/property/orders?/:id',
+    '/property/:propertyId/workOrders?/:id',
+    '/property/:propertyId/orders?/:id',
+    '/company/property/:propertyId/workOrders?/:id',
+    '/company/property/:propertyId/orders?/:id',
+    '/company/:companyId/property/:propertyId/workOrders?/:id',
+    '/company/:companyId/property/:propertyId/orders?/:id',
+  ],
+  authRequired,
+  function (req, res) {
+    const id = String(req.params.id);
+    WorkOrders.findById(id)
+      .then((workOrder) => {
+        if (workOrder) {
+          res.status(200).json(workOrder);
+        } else {
+          res.status(404).json({ error: 'WorkOrderNotFound' });
+        }
+      })
+      .catch((err) => {
+        res.status(500).json({ error: err.message });
+      });
+  }
+);
 
-router.get('/user/:id', function (req, res) {
-  const id = String(req.params.id);
-  WorkOrders.findByUser(id)
-    .then((workOrder) => {
-      if (workOrder) {
-        res.status(200).json(workOrder);
-      } else {
-        res.status(404).json({ error: 'WorkOrderNotFound' });
-      }
-    })
-    .catch((err) => {
-      res.status(500).json({ error: err.message });
-    });
-});
+router.get(
+  [
+    '/company/:companyId',
+    '/company/:companyId/workOrders?',
+    '/company/:companyId/orders?',
+  ],
+  function (req, res) {
+    const companyId = req.params.companyId;
+    console.log(companyId);
+    WorkOrders.findBy({ company: companyId })
+      .then((workOrder) => {
+        if (workOrder) {
+          res.status(200).json(workOrder);
+        } else {
+          res.status(404).json({ error: 'WorkOrderNotFound' });
+        }
+      })
+      .catch((err) => {
+        res.status(500).json({ error: err.message });
+      });
+  }
+);
+
+router.get(
+  [
+    '/property/:propertyId',
+    '/property/:propertyId/workOrders?',
+    '/property/:propertyId/orders?',
+    '/company/property/:propertyId',
+    '/company/property/:propertyId/workOrders?',
+    '/company/property/:propertyId/orders?',
+    '/company/:companyId/property/:propertyId',
+    '/company/:companyId/property/:propertyId/workOrders?',
+    '/company/:companyId/property/:propertyId/orders?',
+  ],
+  function (req, res) {
+    const propertyId = req.params.propertyId;
+    console.log(propertyId);
+    WorkOrders.findBy({ property: propertyId })
+      .then((workOrder) => {
+        if (workOrder) {
+          res.status(200).json(workOrder);
+        } else {
+          res.status(404).json({ error: 'WorkOrderNotFound' });
+        }
+      })
+      .catch((err) => {
+        res.status(500).json({ error: err.message });
+      });
+  }
+);
 
 /**
  * @swagger

@@ -95,7 +95,7 @@ describe('workOrders router endpoints', () => {
 
     it('should return 404 when not found', async () => {
       WorkOrders.findById.mockResolvedValue();
-      const res = await request(server).get('/workOrder/9999999');
+      const res = await request(server).get('/workOrder/0');
 
       expect(res.status).toBe(404);
       expect(res.body.error).toBe('WorkOrderNotFound');
