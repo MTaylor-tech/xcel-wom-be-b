@@ -1,15 +1,17 @@
 const express = require('express');
 const userModel = require('./userModel');
 const router = express.Router();
+const authRequired = require('../middleware/authRequired');
 
-router.get('/:company_id/users', function (req, res) {
+
+router.get('/:company_id/users', authRequired, function (req, res) {
     userModel.getCompanyUsers(req.params.company_id)
       .then((users) => {
         res.status(200).json(users);
       })
       .catch((err) => {
         console.log(err);
-        res.status(500).json({ message: "Not found" });
+        res.status(500).json({ message: "Something went wrong", err });
       });
   });
 
@@ -20,7 +22,7 @@ router.get('/:company_id/user/:user_id', function (req, res) {
         })
         .catch((err) => {
           console.log(err);
-          res.status(500).json({ message: "Not found" });
+          res.status(500).json({ message: "user not found", err });
         });
 })
 
@@ -32,7 +34,7 @@ router.post('/:company_id/user', function (req, res) {
         })
         .catch((err) => {
           console.log(err);
-          res.status(500).json({ message: "Something went wrong" });
+          res.status(500).json({ message: "Something went wrong", err });
         });
 })
 
@@ -44,7 +46,7 @@ router.put('/user/:user_id', function (req, res) {
       })
       .catch((err) => {
         console.log(err);
-        res.status(500).json({ message: req.params });
+        res.status(500).json({ message: "Unable to update", err });
       });
 })
 
@@ -55,7 +57,7 @@ router.delete("/:company_id/user/:user_id", function (req, res) {
     })
     .catch((err) => {
       console.log(err);
-      res.status(500).json({ message: "Something went wrong" });
+      res.status(500).json({ message: "Something went wrong", err });
     });
 })
 
