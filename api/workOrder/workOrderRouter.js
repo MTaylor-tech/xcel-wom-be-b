@@ -308,7 +308,7 @@ router.get(
     console.log(propertyId);
     WorkOrders.findBy({ property: propertyId })
       .then((workOrder) => {
-        if (workOrder) {
+        if (workOrder.length > 0) {
           res.status(200).json(workOrder);
         } else {
           res.status(404).json({ error: 'WorkOrderNotFound' });
@@ -415,28 +415,35 @@ router.post('/', authRequired, async (req, res) => {
  *                workOrder:
  *                  $ref: '#/components/schemas/WorkOrder'
  */
-router.put('/', authRequired, function (req, res) {
+router.put(['/', '/:workOrderId'], authRequired, function (req, res) {
   const workOrder = req.body;
   if (workOrder) {
     const id = workOrder.id || 0;
     WorkOrders.findById(id)
-      .then(
-        WorkOrders.update(id, workOrder)
-          .then((updated) => {
-            res
-              .status(200)
-              .json({ message: 'workOrder created', workOrder: updated[0] });
-          })
-          .catch((err) => {
-            res.status(500).json({
-              message: `Could not update workOrder '${id}'`,
-              error: err.message,
+      .then((found) => {
+        if (found) {
+          WorkOrders.update(id, workOrder)
+            .then((updated) => {
+              res
+                .status(200)
+                .json({ message: 'workOrder updated', workOrder: updated[0] });
+            })
+            .catch((err) => {
+              res.status(500).json({
+                message: `Could not update workOrder '${id}'`,
+                error: err.message,
+              });
             });
-          })
-      )
+        } else {
+          res.status(404).json({
+            message: `Could not find workOrder '${id}'`,
+            error: `not found`,
+          });
+        }
+      })
       .catch((err) => {
-        res.status(404).json({
-          message: `Could not find workOrder '${id}'`,
+        res.status(500).json({
+          message: `Error updating workOrder '${id}'`,
           error: err.message,
         });
       });
