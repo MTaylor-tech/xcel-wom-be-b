@@ -42,6 +42,7 @@ router.post('/:company_id/user', function (req, res) {
 
 router.put('/user/:user_id', function (req, res) {
   const updates = req.body;
+  console.log(updates);
   userModel
     .updateProfile(updates, req.params.user_id)
     .then((user) => {
