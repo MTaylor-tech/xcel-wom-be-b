@@ -2,18 +2,34 @@ const express = require('express');
 const userModel = require('./userModel');
 const router = express.Router();
 const authRequired = require('../middleware/authRequired');
+const companyIdCheck = require('../middleware/companyIdCheck');
 
-router.get('/:company_id/users', authRequired, function (req, res) {
+router.get('/:company_id', function (req, res) {
   userModel
-    .getCompanyUsers(req.params.company_id)
-    .then((users) => {
-      res.status(200).json(users);
+    .getCompany(req.params.company_id)
+    .then((company) => {
+      res.status(200).json(company);
     })
     .catch((err) => {
-      console.log(err);
-      res.status(500).json({ message: 'Something went wrong', err });
+      res.status(500).json({ message: 'Company not found' }, err);
     });
 });
+router.get(
+  '/:company_id/users',
+  authRequired,
+  companyIdCheck,
+  function (req, res) {
+    userModel
+      .getCompanyUsers(req.params.company_id)
+      .then((users) => {
+        res.status(200).json(users);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({ message: 'Something went wrong', err });
+      });
+  }
+);
 
 router.get('/:company_id/user/:user_id', function (req, res) {
   userModel
@@ -27,7 +43,7 @@ router.get('/:company_id/user/:user_id', function (req, res) {
     });
 });
 
-router.post('/:company_id/user', function (req, res) {
+router.post('/:company_id/user', companyIdCheck, function (req, res) {
   const createUser = req.body;
   userModel
     .createUser(createUser)
