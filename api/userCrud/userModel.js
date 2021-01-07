@@ -1,5 +1,8 @@
 const db = require('../../data/db-config');
 
+const getCompany = async (id) => {
+  return await db('companies').select().where('id', '=', id);
+};
 const getCompanyUsers = async (id) => {
   return await db('profiles').select().where('company', '=', id);
 };
@@ -21,6 +24,7 @@ const deleteUser = async (id) => {
 };
 
 module.exports = {
+  getCompany,
   getCompanyUsers,
   getCompanyUser,
   createUser,
