@@ -3,6 +3,7 @@ const userModel = require('./userModel');
 const router = express.Router();
 const authRequired = require('../middleware/authRequired');
 const companyIdCheck = require('../middleware/companyIdCheck');
+const userIdCheck = require('../middleware/userIdCheck');
 
 router.get('/:company_id', function (req, res) {
   userModel
@@ -70,16 +71,21 @@ router.put('/user/:user_id', function (req, res) {
     });
 });
 
-router.delete('/:company_id/user/:user_id', function (req, res) {
-  userModel
-    .deleteUser(req.params.user_id)
-    .then(() => {
-      res.status(200).json({ message: 'Deleted' });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ message: 'Something went wrong', err });
-    });
-});
+router.delete(
+  '/:company_id/user/:user_id',
+  companyIdCheck,
+  userIdCheck,
+  function (req, res) {
+    userModel
+      .deleteUser(req.params.user_id)
+      .then(() => {
+        res.status(200).json({ message: 'Deleted' });
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({ message: 'Something went wrong', err });
+      });
+  }
+);
 
 module.exports = router;
