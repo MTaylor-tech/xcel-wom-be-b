@@ -3,6 +3,7 @@ const createError = require('http-errors');
 
 const companyIdCheck = async (req, res, next) => {
   try {
+    console.log(req.params);
     const company = userModel.getCompany(req.params.company_id);
     if (company) {
       next();
