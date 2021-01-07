@@ -57,7 +57,7 @@ router.post('/:company_id/user', companyIdCheck, function (req, res) {
     });
 });
 
-router.put('/user/:user_id', function (req, res) {
+router.put('/user/:user_id', userIdCheck, function (req, res) {
   const updates = req.body;
   console.log(updates);
   userModel
