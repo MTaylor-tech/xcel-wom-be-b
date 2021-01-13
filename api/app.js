@@ -21,8 +21,9 @@ const swaggerUIOptions = {
 //###[  Routers ]###
 const indexRouter = require('./index/indexRouter');
 const profileRouter = require('./profile/profileRouter');
-const workOrderRouter = require('./workOrder/workOrderRouter');
 
+const userRouter = require('./userCrud/userRouter');
+const workOrderRouter = require('./workOrder/workOrderRouter');
 const app = express();
 
 process.on('unhandledRejection', (reason, p) => {
@@ -50,6 +51,7 @@ app.use(cookieParser());
 // application routes
 app.use('/', indexRouter);
 app.use(['/profile', '/profiles'], profileRouter);
+app.use('/company', userRouter);
 app.use(
   [
     '/workOrders?',
