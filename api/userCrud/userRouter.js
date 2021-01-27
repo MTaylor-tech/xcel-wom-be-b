@@ -191,9 +191,8 @@ router.post('/:company_id/user', companyIdCheck, function (req, res) {
  *        $ref: '#/components/responses/NotFound'
  */
 router.post('/user/:code', function (req, res) {
-  const createUser = req.body;
   userModel
-    .createUserWithCode(createUser, req.params.code)
+    .createUserWithCode(req.body, req.params.code)
     .then((user) => {
       res.status(200).json(user);
     })
@@ -283,6 +282,18 @@ router.put('/user/:user_id', userIdCheck, function (req, res) {
     .updateProfile(updates, req.params.user_id)
     .then((user) => {
       res.status(200).json({ message: req.body, user });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ message: 'Unable to update', err });
+    });
+});
+
+router.put('/user/:user_id/:code', userIdCheck, function (req, res) {
+  userModel
+    .assignUser(req.params.user_id, req.params.code)
+    .then((user) => {
+      res.status(200).json({ message: 'User added.', user });
     })
     .catch((err) => {
       console.log(err);

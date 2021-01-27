@@ -36,6 +36,15 @@ const createUserNewCompany = async (user, company) => {
   return createUser(user);
 };
 
+const assignUser = async (userId, code) => {
+  const role = await Companies.findRoleByCode(code);
+  if (role) {
+    return updateProfile({ role: role.id, company: role.company }, userId);
+  } else {
+    return undefined;
+  }
+};
+
 const updateProfile = async (updates, userId) => {
   return await db('profiles').where('id', '=', userId).update(updates);
 };
@@ -51,6 +60,7 @@ module.exports = {
   createUser,
   createUserWithCode,
   createUserNewCompany,
+  assignUser,
   updateProfile,
   deleteUser,
 };
