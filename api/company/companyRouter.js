@@ -27,16 +27,44 @@ const router = express.Router();
  *      403:
  *        $ref: '#/components/responses/UnauthorizedError'
  */
-router.get('/', authRequired, function (req, res) {
-  Companies.findAll()
-    .then((companies) => {
-      res.status(200).json(companies);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ message: err.message });
-    });
-});
+router
+  .route('/')
+  .all(authRequired)
+  .get(function (req, res) {
+    Companies.findAll()
+      .then((companies) => {
+        res.status(200).json(companies);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({ message: err.message });
+      });
+  })
+  .post(async function (req, res) {
+    const company = req.body;
+    if (company) {
+      const id = company.id || 0;
+      try {
+        await Companies.findById(id).then(async (pf) => {
+          if (pf == undefined) {
+            //company not found so lets insert it
+            await Companies.create(company).then((company) =>
+              res
+                .status(200)
+                .json({ message: 'company created', company: company[0] })
+            );
+          } else {
+            res.status(400).json({ message: 'company already exists' });
+          }
+        });
+      } catch (e) {
+        console.error(e);
+        res.status(500).json({ message: e.message });
+      }
+    } else {
+      res.status(404).json({ message: 'Company missing' });
+    }
+  });
 
 /**
  * @swagger
@@ -115,31 +143,31 @@ router.get('/:id', authRequired, function (req, res) {
  *                company:
  *                  $ref: '#/components/schemas/company'
  */
-router.post('/', authRequired, async (req, res) => {
-  const company = req.body;
-  if (company) {
-    const id = company.id || 0;
-    try {
-      await Companies.findById(id).then(async (pf) => {
-        if (pf == undefined) {
-          //company not found so lets insert it
-          await Companies.create(company).then((company) =>
-            res
-              .status(200)
-              .json({ message: 'company created', company: company[0] })
-          );
-        } else {
-          res.status(400).json({ message: 'company already exists' });
-        }
-      });
-    } catch (e) {
-      console.error(e);
-      res.status(500).json({ message: e.message });
-    }
-  } else {
-    res.status(404).json({ message: 'Company missing' });
-  }
-});
+// router.post('/', authRequired, async (req, res) => {
+//   const company = req.body;
+//   if (company) {
+//     const id = company.id || 0;
+//     try {
+//       await Companies.findById(id).then(async (pf) => {
+//         if (pf == undefined) {
+//           //company not found so lets insert it
+//           await Companies.create(company).then((company) =>
+//             res
+//               .status(200)
+//               .json({ message: 'company created', company: company[0] })
+//           );
+//         } else {
+//           res.status(400).json({ message: 'company already exists' });
+//         }
+//       });
+//     } catch (e) {
+//       console.error(e);
+//       res.status(500).json({ message: e.message });
+//     }
+//   } else {
+//     res.status(404).json({ message: 'Company missing' });
+//   }
+// });
 
 /**
  * @swagger
