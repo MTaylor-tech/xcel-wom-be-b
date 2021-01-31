@@ -183,14 +183,19 @@ router
 router.put(['/', '/:id'], authRequired, function (req, res) {
   const property = req.body;
   if (property) {
-    const id = property.id || 0;
+    let id = 0;
+    if (req.params.id) {
+      id = req.params.id;
+    } else if (property.id) {
+      id = property.id;
+    }
     Properties.findById(id)
       .then(
         Properties.update(id, property)
           .then((updated) => {
             res
               .status(200)
-              .json({ message: 'property created', property: updated[0] });
+              .json({ message: 'property updated', property: updated[0] });
           })
           .catch((err) => {
             res.status(500).json({

@@ -68,7 +68,7 @@ router.get('/:company_id', function (req, res) {
  *        description: 'Something went wrong'
  */
 router.get(
-  '/:company_id/users',
+  '/:company_id/users?',
   authRequired,
   companyIdCheck,
   function (req, res) {
@@ -107,7 +107,7 @@ router.get(
  *      500:
  *        $ref: '#/components/responses/NotFound'
  */
-router.get('/:company_id/user/:user_id', function (req, res) {
+router.get('/:company_id/users?/:user_id', function (req, res) {
   userModel
     .getCompanyUser(req.params.company_id, req.params.user_id)
     .then((user) => {
@@ -148,7 +148,7 @@ router.get('/:company_id/user/:user_id', function (req, res) {
  *      500:
  *        $ref: '#/components/responses/NotFound'
  */
-router.post('/:company_id/user', companyIdCheck, function (req, res) {
+router.post('/:company_id/users?', companyIdCheck, function (req, res) {
   const createUser = req.body;
   userModel
     .createUser(createUser)
@@ -164,7 +164,7 @@ router.post('/:company_id/user', companyIdCheck, function (req, res) {
 /**
  * @swagger
  * /company/user/{userId}:
- *  post:
+ *  put:
  *    description: update a user
  *    summary: update a user
  *    security:
@@ -190,19 +190,23 @@ router.post('/:company_id/user', companyIdCheck, function (req, res) {
  *      500:
  *        description: 'Unable to update'
  */
-router.put('/user/:user_id', userIdCheck, function (req, res) {
-  const updates = req.body;
-  console.log(updates);
-  userModel
-    .updateProfile(updates, req.params.user_id)
-    .then((user) => {
-      res.status(200).json({ message: req.body, user });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ message: 'Unable to update', err });
-    });
-});
+router.put(
+  ['/users?/:user_id', '/:company_id/users?/:user_id'],
+  userIdCheck,
+  function (req, res) {
+    const updates = req.body;
+    console.log(updates);
+    userModel
+      .updateProfile(updates, req.params.user_id)
+      .then((user) => {
+        res.status(200).json({ message: req.body, user });
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({ message: 'Unable to update', err });
+      });
+  }
+);
 
 /**
  * @swagger
@@ -224,7 +228,7 @@ router.put('/user/:user_id', userIdCheck, function (req, res) {
  *        description: A message about the result
  */
 router.delete(
-  '/:company_id/user/:user_id',
+  '/:company_id/users?/:user_id',
   companyIdCheck,
   userIdCheck,
   function (req, res) {
@@ -239,5 +243,96 @@ router.delete(
       });
   }
 );
+
+/**
+ * @swagger
+ * /company/user/{code}:
+ *  post:
+ *    description: create a new user and add them to the role by code
+ *    summary: create a new user and add them to the role by code
+ *    security:
+ *      - okta: []
+ *    tags:
+ *      - users
+ *    parameters:
+ *      - $ref: '#/components/parameters/code'
+ *    requestBody:
+ *      description: user object to to be added
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/user'
+ *    responses:
+ *      200:
+ *        description: the new user object
+ *        content:
+ *          application/json:
+ *             $ref: '#/components/schemas/user'
+ *      401:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      403:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      500:
+ *        description: 'Unable to add user'
+ */
+
+/**
+ * @swagger
+ * /company/new:
+ *  post:
+ *    description: create a new company and add a new user as admin
+ *    summary: create a new company and add a new user as admin
+ *    security:
+ *      - okta: []
+ *    tags:
+ *      - users
+ *      - company
+ *    requestBody:
+ *      description: user and company objects to to be added
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/user'
+ *            $ref: '#/components/schemas/company'
+ *    responses:
+ *      200:
+ *        description: the new user object
+ *        content:
+ *          application/json:
+ *             $ref: '#/components/schemas/user'
+ *      401:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      403:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      500:
+ *        description: 'Unable to add user'
+ */
+
+/**
+ * @swagger
+ * /company/user/{userId}/{code}:
+ *  put:
+ *    description: add a user to the role by code
+ *    summary: add a user to the role by code
+ *    security:
+ *      - okta: []
+ *    tags:
+ *      - users
+ *    parameters:
+ *      - $ref: '#/components/parameters/userId'
+ *      - $ref: '#/components/parameters/code'
+ *    responses:
+ *      200:
+ *        description: the new user object
+ *        content:
+ *          application/json:
+ *             $ref: '#/components/schemas/user'
+ *      401:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      403:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      500:
+ *        description: 'Unable to add user'
+ */
 
 module.exports = router;
