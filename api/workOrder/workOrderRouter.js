@@ -426,6 +426,14 @@ module.exports = router;
  *      example: 1
  *      schema:
  *        type: integer
+ *    code:
+ *      name: code
+ *      in: path
+ *      description: a 6-character unique code that represents a role
+ *      required: true
+ *      example: 2WZAXj
+ *      schema:
+ *        type: string
  *  schemas:
  *    user:
  *      type: object
@@ -462,6 +470,30 @@ module.exports = router;
  *          description: autoincrements
  *        name:
  *          type: string
+ *    role:
+ *      type: object
+ *      properties:
+ *        id:
+ *          type: integer
+ *          description: autoincrements
+ *        name:
+ *          type: string
+ *          description: the name of the role
+ *        userLevel:
+ *          type: integer
+ *          description: The authorization level of the role from 1-4(admin)
+ *        company:
+ *          type: integer
+ *          description: a reference to the company id
+ *        code:
+ *          type: string
+ *          description: a 6-character randomized unique string
+ *      example:
+ *        id: 115
+ *        name: Supervisor
+ *        userLevel: 3
+ *        company: 22
+ *        code: 2WZAXj
  *    property:
  *      type: object
  *      properties:
