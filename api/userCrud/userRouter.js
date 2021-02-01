@@ -203,7 +203,7 @@ router
   .all(userIdCheck)
   .get(function (req, res) {
     userModel
-      .getCompanyUser(req.params.company_id, req.params.user_id)
+      .getCompanyUser(req.params.user_id)
       .then((user) => {
         res.status(200).json(user);
       })
