@@ -50,7 +50,7 @@
 
 - `/companies`
   - GET: returns array of all companies
-  - POST: add a company, set up roles & codes (returns msg & new company) (mk sr rtns r+c)
+  - POST: add a company, set up roles & codes (returns msg & new company)
 - `/companies/{companyId}`
   - GET: returns the specified company
   - PUT: update specified company (returns msg & updated company)

@@ -135,6 +135,8 @@ router
  *        application/json:
  *          schema:
  *            $ref: '#/components/schemas/company'
+ *    parameters:
+ *      - $ref: '#/components/parameters/companyId'
  *    responses:
  *      401:
  *        $ref: '#/components/responses/UnauthorizedError'

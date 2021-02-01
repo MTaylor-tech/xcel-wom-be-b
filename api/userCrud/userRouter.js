@@ -15,6 +15,8 @@ const userIdCheck = require('../middleware/userIdCheck');
  *      - okta: []
  *    tags:
  *      - company
+ *    parameters:
+ *      - $ref: '#/components/parameters/companyId'
  *    responses:
  *      200:
  *        description: company object
@@ -51,6 +53,8 @@ router.get('/:company_id', function (req, res) {
  *    tags:
  *      - company
  *      - users
+ *    parameters:
+ *      - $ref: '#/components/parameters/companyId'
  *    responses:
  *      200:
  *        description: array of users
@@ -66,6 +70,33 @@ router.get('/:company_id', function (req, res) {
  *        $ref: '#/components/responses/UnauthorizedError'
  *      500:
  *        description: 'Something went wrong'
+ *  post:
+ *    description: add a user
+ *    summary: add a user
+ *    security:
+ *      - okta: []
+ *    tags:
+ *      - users
+ *    requestBody:
+ *      description: user object to to be added (minus id, foreign keys represented by integers or uuid)
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/user'
+ *    parameters:
+ *      - $ref: '#/components/parameters/companyId'
+ *    responses:
+ *      200:
+ *        description: the new user object
+ *        content:
+ *          application/json:
+ *             $ref: '#/components/schemas/user'
+ *      401:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      403:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      500:
+ *        $ref: '#/components/responses/NotFound'
  */
 router.get(
   '/:company_id/users?',
@@ -84,70 +115,6 @@ router.get(
   }
 );
 
-/**
- * @swagger
- * /company/{companyId}/user/{userId}:
- *  get:
- *    description: Returns a user object
- *    summary: Returns a user object
- *    security:
- *      - okta: []
- *    tags:
- *      - users
- *    responses:
- *      200:
- *        description: array of users
- *        content:
- *          application/json:
- *             $ref: '#/components/schemas/user'
- *      401:
- *        $ref: '#/components/responses/UnauthorizedError'
- *      403:
- *        $ref: '#/components/responses/UnauthorizedError'
- *      500:
- *        $ref: '#/components/responses/NotFound'
- */
-router.get('/:company_id/users?/:user_id', function (req, res) {
-  userModel
-    .getCompanyUser(req.params.company_id, req.params.user_id)
-    .then((user) => {
-      res.status(200).json(user);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ message: 'user not found', err });
-    });
-});
-
-/**
- * @swagger
- * /company/{companyId}/user:
- *  post:
- *    description: add a user
- *    summary: add a user
- *    security:
- *      - okta: []
- *    tags:
- *      - users
- *    requestBody:
- *      description: user object to to be added (minus id, foreign keys represented by integers or uuid)
- *      content:
- *        application/json:
- *          schema:
- *            $ref: '#/components/schemas/user'
- *    responses:
- *      200:
- *        description: the new user object
- *        content:
- *          application/json:
- *             $ref: '#/components/schemas/user'
- *      401:
- *        $ref: '#/components/responses/UnauthorizedError'
- *      403:
- *        $ref: '#/components/responses/UnauthorizedError'
- *      500:
- *        $ref: '#/components/responses/NotFound'
- */
 router.post('/:company_id/users?', companyIdCheck, function (req, res) {
   const createUser = req.body;
   userModel
@@ -163,7 +130,29 @@ router.post('/:company_id/users?', companyIdCheck, function (req, res) {
 
 /**
  * @swagger
- * /company/user/{userId}:
+ * /company/{companyId}/user/{userId}:
+ *  get:
+ *    description: Returns a user object
+ *    summary: Returns a user object
+ *    security:
+ *      - okta: []
+ *    tags:
+ *      - users
+ *    parameters:
+ *      - $ref: '#/components/parameters/companyId'
+ *      - $ref: '#/components/parameters/userId'
+ *    responses:
+ *      200:
+ *        description: array of users
+ *        content:
+ *          application/json:
+ *             $ref: '#/components/schemas/user'
+ *      401:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      403:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      500:
+ *        $ref: '#/components/responses/NotFound'
  *  put:
  *    description: update a user
  *    summary: update a user
@@ -177,6 +166,9 @@ router.post('/:company_id/users?', companyIdCheck, function (req, res) {
  *        application/json:
  *          schema:
  *            $ref: '#/components/schemas/user'
+ *    parameters:
+ *      - $ref: '#/components/parameters/companyId'
+ *      - $ref: '#/components/parameters/userId'
  *    responses:
  *      200:
  *        description: the updated user object
@@ -189,11 +181,38 @@ router.post('/:company_id/users?', companyIdCheck, function (req, res) {
  *        $ref: '#/components/responses/UnauthorizedError'
  *      500:
  *        description: 'Unable to update'
+ *  delete:
+ *    summary: Remove a user
+ *    security:
+ *      - okta: []
+ *    tags:
+ *      - user
+ *    parameters:
+ *      - $ref: '#/components/parameters/companyId'
+ *      - $ref: '#/components/parameters/userId'
+ *    responses:
+ *      401:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      404:
+ *        $ref: '#/components/responses/NotFound'
+ *      200:
+ *        description: A message about the result
  */
-router.put(
-  ['/users?/:user_id', '/:company_id/users?/:user_id'],
-  userIdCheck,
-  function (req, res) {
+router
+  .route(['/users?/:user_id', '/:company_id/users?/:user_id'])
+  .all(userIdCheck)
+  .get(function (req, res) {
+    userModel
+      .getCompanyUser(req.params.company_id, req.params.user_id)
+      .then((user) => {
+        res.status(200).json(user);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({ message: 'user not found', err });
+      });
+  })
+  .put(function (req, res) {
     const updates = req.body;
     console.log(updates);
     userModel
@@ -205,33 +224,8 @@ router.put(
         console.log(err);
         res.status(500).json({ message: 'Unable to update', err });
       });
-  }
-);
-
-/**
- * @swagger
- * /company/{companyId}/user/{userId}:
- *  delete:
- *    summary: Remove a user
- *    security:
- *      - okta: []
- *    tags:
- *      - user
- *    parameters:
- *      - $ref: '#/components/parameters/userId'
- *    responses:
- *      401:
- *        $ref: '#/components/responses/UnauthorizedError'
- *      404:
- *        $ref: '#/components/responses/NotFound'
- *      200:
- *        description: A message about the result
- */
-router.delete(
-  '/:company_id/users?/:user_id',
-  companyIdCheck,
-  userIdCheck,
-  function (req, res) {
+  })
+  .delete(function (req, res) {
     userModel
       .deleteUser(req.params.user_id)
       .then(() => {
@@ -241,8 +235,7 @@ router.delete(
         console.log(err);
         res.status(500).json({ message: 'Something went wrong', err });
       });
-  }
-);
+  });
 
 /**
  * @swagger

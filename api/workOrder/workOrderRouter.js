@@ -508,6 +508,9 @@ router
  *        application/json:
  *          schema:
  *            $ref: '#/components/schemas/image'
+ *    parameters:
+ *      - $ref: '#/components/parameters/companyId'
+ *      - $ref: '#/components/parameters/workOrderId'
  *    responses:
  *      401:
  *        $ref: '#/components/responses/UnauthorizedError'
@@ -565,6 +568,10 @@ router
  *      - workOrder
  *      - order
  *      - image
+ *    parameters:
+ *      - $ref: '#/components/parameters/companyId'
+ *      - $ref: '#/components/parameters/workOrderId'
+ *      - $ref: '#/components/parameters/imageId'
  *    responses:
  *      401:
  *        $ref: '#/components/responses/UnauthorizedError'
