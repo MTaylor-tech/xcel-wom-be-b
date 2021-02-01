@@ -30,80 +30,6 @@ const router = express.Router({ mergeParams: true });
  *        $ref: '#/components/responses/UnauthorizedError'
  *      404:
  *        $ref: '#/components/responses/NotFound'
- */
-router.get('/', authRequired, function (req, res) {
-  const companyId = req.params.companyId;
-  if (companyId > 0) {
-    WorkOrders.findByCompany(companyId)
-      .then((workOrders) => {
-        if (workOrders.length > 0) {
-          res.status(200).json(workOrders);
-        } else {
-          res.status(404).json({ error: 'No Work Orders found' });
-        }
-      })
-      .catch((err) => {
-        res.status(500).json({ error: err.message });
-      });
-  } else if (process.env.NODE_ENV === 'development') {
-    // on the development server, `/company/0/orders` will give you all orders
-    WorkOrders.findAll()
-      .then((workOrders) => {
-        if (workOrders.length > 0) {
-          res.status(200).json(workOrders);
-        } else {
-          res.status(404).json({ error: 'No Work Orders found' });
-        }
-      })
-      .catch((err) => {
-        res.status(500).json({ error: err.message });
-      });
-  }
-});
-
-/**
- * @swagger
- * /company/{companyId}/orders/{workOrderId}:
- *  get:
- *    description: Find a single workOrder by ID
- *    summary: Returns a single workOrder
- *    security:
- *      - okta: []
- *    tags:
- *      - workOrder
- *      - order
- *    parameters:
- *      - $ref: '#/components/parameters/workOrderId'
- *    responses:
- *      200:
- *        description: A workOrder object
- *        content:
- *          application/json:
- *            schema:
- *              $ref: '#/components/schemas/workOrder'
- *      401:
- *        $ref: '#/components/responses/UnauthorizedError'
- *      404:
- *        $ref: '#/components/responses/NotFound'
- */
-router.get('/:workOrderId', authRequired, function (req, res) {
-  const id = String(req.params.workOrderId);
-  WorkOrders.findById(id)
-    .then((workOrder) => {
-      if (workOrder) {
-        res.status(200).json(workOrder);
-      } else {
-        res.status(404).json({ error: 'Work Order Not Found' });
-      }
-    })
-    .catch((err) => {
-      res.status(500).json({ error: err.message });
-    });
-});
-
-/**
- * @swagger
- * /company/{companyId}/orders:
  *  post:
  *    summary: Add a workOrder
  *    security:
@@ -137,35 +63,88 @@ router.get('/:workOrderId', authRequired, function (req, res) {
  *                workOrder:
  *                  $ref: '#/components/schemas/workOrder'
  */
-router.post('/', authRequired, async (req, res) => {
-  const workOrder = req.body;
-  if (workOrder) {
-    const id = workOrder.id || 0;
-    try {
-      await WorkOrders.findById(id).then(async (wo) => {
-        if (wo == undefined) {
-          //workOrder not found so lets insert it
-          await WorkOrders.create(workOrder).then((workOrder) =>
-            res
-              .status(200)
-              .json({ message: 'workOrder created', workOrder: workOrder[0] })
-          );
-        } else {
-          res.status(400).json({ message: 'workOrder already exists' });
-        }
-      });
-    } catch (e) {
-      console.error(e);
-      res.status(500).json({ message: e.message });
+router
+  .route('/')
+  .all(authRequired)
+  .get(function (req, res) {
+    const companyId = req.params.companyId;
+    if (companyId > 0) {
+      WorkOrders.findByCompany(companyId)
+        .then((workOrders) => {
+          if (workOrders.length > 0) {
+            res.status(200).json(workOrders);
+          } else {
+            res.status(404).json({ error: 'No Work Orders found' });
+          }
+        })
+        .catch((err) => {
+          res.status(500).json({ error: err.message });
+        });
+    } else if (process.env.NODE_ENV === 'development') {
+      // on the development server, `/company/0/orders` will give you all orders
+      WorkOrders.findAll()
+        .then((workOrders) => {
+          if (workOrders.length > 0) {
+            res.status(200).json(workOrders);
+          } else {
+            res.status(404).json({ error: 'No Work Orders found' });
+          }
+        })
+        .catch((err) => {
+          res.status(500).json({ error: err.message });
+        });
     }
-  } else {
-    res.status(404).json({ message: 'WorkOrder missing' });
-  }
-});
+  })
+  .post(async function (req, res) {
+    const workOrder = req.body;
+    if (workOrder) {
+      const id = workOrder.id || 0;
+      try {
+        await WorkOrders.findById(id).then(async (wo) => {
+          if (wo == undefined) {
+            //workOrder not found so lets insert it
+            await WorkOrders.create(workOrder).then((workOrder) =>
+              res
+                .status(200)
+                .json({ message: 'workOrder created', workOrder: workOrder[0] })
+            );
+          } else {
+            res.status(400).json({ message: 'workOrder already exists' });
+          }
+        });
+      } catch (e) {
+        console.error(e);
+        res.status(500).json({ message: e.message });
+      }
+    } else {
+      res.status(404).json({ message: 'WorkOrder missing' });
+    }
+  });
 
 /**
  * @swagger
  * /company/{companyId}/orders/{workOrderId}:
+ *  get:
+ *    description: Find a single workOrder by ID
+ *    summary: Returns a single workOrder
+ *    security:
+ *      - okta: []
+ *    tags:
+ *      - workOrder
+ *      - order
+ *    parameters:
+ *      - $ref: '#/components/parameters/workOrderId'
+ *    responses:
+ *      200:
+ *        description: A workOrder object
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/workOrder'
+ *      401:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      404:
+ *        $ref: '#/components/responses/NotFound'
  *  put:
  *    summary: Update a workOrder
  *    security:
@@ -195,6 +174,33 @@ router.post('/', authRequired, async (req, res) => {
  *                  type: string
  *                  description: A message about the result
  *                  example: workOrder updated
+ *                workOrder:
+ *                  $ref: '#/components/schemas/workOrder'
+ *  delete:
+ *    summary: Remove a workOrder
+ *    security:
+ *      - okta: []
+ *    tags:
+ *      - workOrder
+ *      - order
+ *    parameters:
+ *      - $ref: '#/components/parameters/workOrderId'
+ *    responses:
+ *      401:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      404:
+ *        $ref: '#/components/responses/NotFound'
+ *      200:
+ *        description: A workOrder object
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  description: A message about the result
+ *                  example: WorkOrder 3 was deleted.
  *                workOrder:
  *                  $ref: '#/components/schemas/workOrder'
  */
@@ -241,25 +247,90 @@ router.put(['/', '/:workOrderId'], authRequired, function (req, res) {
   }
 });
 
+router
+  .route('/:workOrderId')
+  .all(authRequired)
+  .get(function (req, res) {
+    const id = String(req.params.workOrderId);
+    WorkOrders.findById(id)
+      .then((workOrder) => {
+        if (workOrder) {
+          res.status(200).json(workOrder);
+        } else {
+          res.status(404).json({ error: 'Work Order Not Found' });
+        }
+      })
+      .catch((err) => {
+        res.status(500).json({ error: err.message });
+      });
+  })
+  .delete(function (req, res) {
+    const id = req.params.workOrderId;
+    try {
+      WorkOrders.findById(id).then((workOrder) => {
+        WorkOrders.remove(workOrder.id).then(() => {
+          res.status(200).json({
+            message: `WorkOrder '${id}' was deleted.`,
+            workOrder: workOrder,
+          });
+        });
+      });
+    } catch (err) {
+      res.status(500).json({
+        message: `Could not delete workOrder with ID: ${id}`,
+        error: err.message,
+      });
+    }
+  });
+
 /**
  * @swagger
- * /company/{companyId}/orders/{workOrderId}:
- *  delete:
- *    summary: Remove a workOrder
+ * /company/{companyId}/orders/{workOrderId}/comments:
+ *  get:
+ *    description: Get comments for a workOrder
+ *    summary: Get comments for a workOrder
  *    security:
  *      - okta: []
  *    tags:
  *      - workOrder
  *      - order
+ *      - comment
  *    parameters:
+ *      - $ref: '#/components/parameters/companyId'
  *      - $ref: '#/components/parameters/workOrderId'
+ *    responses:
+ *      200:
+ *        description: Array of comments
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/comments'
+ *      401:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      404:
+ *        $ref: '#/components/responses/NotFound'
+ *  post:
+ *    description: add a comment to a workOrder
+ *    summary: add a comment to a workOrder
+ *    security:
+ *      - okta: []
+ *    tags:
+ *      - workOrder
+ *      - order
+ *      - comment
+ *    requestBody:
+ *      description: Comment to be added
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/comment'
  *    responses:
  *      401:
  *        $ref: '#/components/responses/UnauthorizedError'
  *      404:
  *        $ref: '#/components/responses/NotFound'
  *      200:
- *        description: A workOrder object
+ *        description: The new comment
  *        content:
  *          application/json:
  *            schema:
@@ -268,109 +339,251 @@ router.put(['/', '/:workOrderId'], authRequired, function (req, res) {
  *                message:
  *                  type: string
  *                  description: A message about the result
- *                  example: WorkOrder 3 was deleted.
- *                workOrder:
- *                  $ref: '#/components/schemas/workOrder'
+ *                  example: comment added
+ *                comment:
+ *                  $ref: '#/components/schemas/comment'
  */
-router.delete('/:workOrderId', authRequired, function (req, res) {
-  const id = req.params.workOrderId;
-  try {
-    WorkOrders.findById(id).then((workOrder) => {
-      WorkOrders.remove(workOrder.id).then(() => {
+router
+  .route('/:id/comments?')
+  .all(authRequired)
+  .get(function (req, res) {
+    const workOrderId = req.params.id;
+    WorkOrders.getComments(workOrderId)
+      .then((comments) => {
+        res.status(200).json(comments);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({ message: err.message });
+      });
+  })
+  .post(function (req, res) {
+    const comment = req.body;
+    try {
+      WorkOrders.addComment(comment).then((comment) =>
+        res.status(200).json({ message: 'comment added', comment: comment[0] })
+      );
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ message: e.message });
+    }
+  });
+
+/**
+ * @swagger
+ * /company/{companyId}/orders/{workOrderId}/comment/{commentId}:
+ *  put:
+ *    description: Update a comment
+ *    summary: Update a comment
+ *    security:
+ *      - okta: []
+ *    tags:
+ *      - workOrder
+ *      - order
+ *      - comment
+ *    parameters:
+ *      - $ref: '#/components/parameters/companyId'
+ *      - $ref: '#/components/parameters/workOrderId'
+ *      - $ref: '#/components/parameters/commentId'
+ *    responses:
+ *      200:
+ *        description: The updated comment
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  description: A message about the result
+ *                  example: comment updated
+ *                comment:
+ *                  $ref: '#/components/schemas/comment'
+ *      401:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      404:
+ *        $ref: '#/components/responses/NotFound'
+ *  delete:
+ *    description: remove a comment
+ *    summary: remove a comment
+ *    security:
+ *      - okta: []
+ *    tags:
+ *      - workOrder
+ *      - order
+ *      - comment
+ *    responses:
+ *      401:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      404:
+ *        $ref: '#/components/responses/NotFound'
+ *      200:
+ *        description: The deleted comment
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  description: A message about the result
+ *                  example: comment deleted
+ *                comment:
+ *                  $ref: '#/components/schemas/comment'
+ */
+router
+  .route('/:id/comments?/:commentId')
+  .all(authRequired)
+  .put(function (req, res) {
+    const commentId = req.params.commentId;
+    const comment = req.body;
+    try {
+      WorkOrders.updateComment(commentId, comment).then((updated) => {
+        res
+          .status(200)
+          .json({ message: 'comment updated', comment: updated[0] });
+      });
+    } catch (err) {
+      res.status(500).json({
+        message: `Could not update comment '${commentId}'`,
+        error: err.message,
+      });
+    }
+  })
+  .delete(function (req, res) {
+    const id = req.params.commentId;
+    try {
+      WorkOrders.removeComment(id).then((comment) => {
         res.status(200).json({
-          message: `WorkOrder '${id}' was deleted.`,
-          workOrder: workOrder,
+          message: `comment '${id}' was deleted.`,
+          comment: comment,
         });
       });
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: `Could not delete workOrder with ID: ${id}`,
-      error: err.message,
-    });
-  }
-});
-
-router.get('/:id/comments?', authRequired, function (req, res) {
-  const workOrderId = req.params.id;
-  WorkOrders.getComments(workOrderId)
-    .then((comments) => {
-      res.status(200).json(comments);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ message: err.message });
-    });
-});
-
-router.post('/:id/comments?', authRequired, function (req, res) {
-  const comment = req.body;
-  try {
-    WorkOrders.addComment(comment).then((comment) =>
-      res.status(200).json({ message: 'comment added', comment: comment[0] })
-    );
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ message: e.message });
-  }
-});
-
-router.put('/:id/comments?/:commentId', authRequired, function (req, res) {
-  const commentId = req.params.commentId;
-  const comment = req.body;
-  try {
-    WorkOrders.updateComment(commentId, comment).then((updated) => {
-      res.status(200).json({ message: 'comment updated', comment: updated[0] });
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: `Could not update comment '${commentId}'`,
-      error: err.message,
-    });
-  }
-});
-
-router.delete('/:id/comments?/:commentId', authRequired, function (req, res) {
-  const id = req.params.commentId;
-  try {
-    WorkOrders.removeComment(id).then((comment) => {
-      res.status(200).json({
-        message: `comment '${id}' was deleted.`,
-        comment: comment,
+    } catch (err) {
+      res.status(500).json({
+        message: `Could not delete comment with ID: ${id}`,
+        error: err.message,
       });
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: `Could not delete comment with ID: ${id}`,
-      error: err.message,
-    });
-  }
-});
+    }
+  });
 
-router.get('/:id/images?', authRequired, function (req, res) {
-  const workOrderId = req.params.id;
-  WorkOrders.getImages(workOrderId)
-    .then((images) => {
-      res.status(200).json(images);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ message: err.message });
-    });
-});
+/**
+ * @swagger
+ * /company/{companyId}/orders/{workOrderId}/images:
+ *  get:
+ *    description: Get images for a workOrder
+ *    summary: Get images for a workOrder
+ *    security:
+ *      - okta: []
+ *    tags:
+ *      - workOrder
+ *      - order
+ *      - image
+ *    parameters:
+ *      - $ref: '#/components/parameters/companyId'
+ *      - $ref: '#/components/parameters/workOrderId'
+ *    responses:
+ *      200:
+ *        description: Array of images
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/images'
+ *      401:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      404:
+ *        $ref: '#/components/responses/NotFound'
+ *  post:
+ *    description: add an image to a workOrder
+ *    summary: add an image to a workOrder
+ *    security:
+ *      - okta: []
+ *    tags:
+ *      - workOrder
+ *      - order
+ *      - image
+ *    requestBody:
+ *      description: Image to be added
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/image'
+ *    responses:
+ *      401:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      404:
+ *        $ref: '#/components/responses/NotFound'
+ *      200:
+ *        description: The new image
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  description: A message about the result
+ *                  example: image added
+ *                image:
+ *                  $ref: '#/components/schemas/image'
+ */
+router
+  .route('/:id/images?')
+  .all(authRequired)
+  .get(function (req, res) {
+    const workOrderId = req.params.id;
+    WorkOrders.getImages(workOrderId)
+      .then((images) => {
+        res.status(200).json(images);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json({ message: err.message });
+      });
+  })
+  .post(function (req, res) {
+    const image = req.body;
+    try {
+      WorkOrders.addImage(image).then((image) =>
+        res.status(200).json({ message: 'image added', comment: image[0] })
+      );
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ message: e.message });
+    }
+  });
 
-router.post('/:id/images?', authRequired, function (req, res) {
-  const image = req.body;
-  try {
-    WorkOrders.addImage(image).then((image) =>
-      res.status(200).json({ message: 'image added', comment: image[0] })
-    );
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ message: e.message });
-  }
-});
-
+/**
+ * @swagger
+ * /company/{companyId}/orders/{workOrderId}/image/{imageId}:
+ *  delete:
+ *    description: remove an image
+ *    summary: remove an image
+ *    security:
+ *      - okta: []
+ *    tags:
+ *      - workOrder
+ *      - order
+ *      - image
+ *    responses:
+ *      401:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      404:
+ *        $ref: '#/components/responses/NotFound'
+ *      200:
+ *        description: The deleted image
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  description: A message about the result
+ *                  example: image deleted
+ *                image:
+ *                  $ref: '#/components/schemas/image'
+ */
 router.delete('/:id/images?/:imageId', authRequired, function (req, res) {
   const id = req.params.imageId;
   try {
@@ -421,7 +634,7 @@ module.exports = router;
  *    propertyId:
  *      name: id
  *      in: path
- *      description: ID of the user to return
+ *      description: ID of the property to return
  *      required: true
  *      example: 1
  *      schema:
@@ -434,6 +647,22 @@ module.exports = router;
  *      example: 2WZAXj
  *      schema:
  *        type: string
+ *    commentId:
+ *      name: id
+ *      in: path
+ *      description: ID of the comment
+ *      required: true
+ *      example: 145
+ *      schema:
+ *        type: integer
+ *    imageId:
+ *      name: id
+ *      in: path
+ *      description: ID of the image
+ *      required: true
+ *      example: 123
+ *      schema:
+ *        type: integer
  *  schemas:
  *    user:
  *      type: object

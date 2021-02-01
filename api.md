@@ -11,16 +11,16 @@
   - GET: returns the specified WO
   - PUT: update the specified WO (returns msg & updated WO)
   - DELETE: remove the specified WO (returns msg & deleted WO)
-- `/company/{companyId}/order/{orderId}/comments` (needs docs)
+- `/company/{companyId}/order/{orderId}/comments`
   - GET: returns array of comments for WO, empty array if none
   - POST: add comment (returns msg & new comment)
-- `/company/{companyId}/order/{orderId}/comment/{commentId}` (nd)
+- `/company/{companyId}/order/{orderId}/comment/{commentId}`
   - PUT: update the comment (returns msg & updated comment)
   - DELETE: remove the comment (returns msg & deleted comment)
-- `/company/{companyId}/order/{orderId}/images` (nd)
+- `/company/{companyId}/order/{orderId}/images`
   - GET: returns array of images for WO, empty array if none
   - POST: add image (returns msg & new image)
-- `/company/{companyId}/order/{orderId}/image/{imageId}` (nd)
+- `/company/{companyId}/order/{orderId}/image/{imageId}`
   - DELETE: remove the image (returns msg & deleted image)
 
 ### User Router:
@@ -36,7 +36,7 @@
   - GET: return specified user
   - PUT: update the user (returns msg & updated user)
   - DELETE: remove specified user (returns msg)
-- Still awaiting review & merge:
+- **_Still awaiting review & merge:_**
 - `/company/user/{code}`
   - POST: creates a new user, putting them into the company and role specified by the code
 - `/company/new`
@@ -55,7 +55,7 @@
   - GET: returns the specified company
   - PUT: update specified company (returns msg & updated company)
   - DELETE: remove the company (returns msg & deleted company)
-- Still awaiting review & merge:
+- **_Still awaiting review & merge:_**
   - `/companies/{companyId}/roles`
     - GET: returns an array of the company's roles, including registration codes
   - `/companies/roles/{code}`
