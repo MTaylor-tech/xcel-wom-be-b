@@ -261,7 +261,7 @@ router
  *      - okta: []
  *    tags:
  *      - company
- *      - roles
+ *      - role
  *    parameters:
  *      - $ref: '#/components/parameters/companyId'
  *    responses:
@@ -291,7 +291,7 @@ router
  *      - okta: []
  *    tags:
  *      - company
- *      - roles
+ *      - role
  *    parameters:
  *      - $ref: '#/components/parameters/code'
  *    responses:

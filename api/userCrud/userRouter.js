@@ -52,7 +52,7 @@ router.get('/:company_id', function (req, res) {
  *      - okta: []
  *    tags:
  *      - company
- *      - users
+ *      - user
  *    parameters:
  *      - $ref: '#/components/parameters/companyId'
  *    responses:
@@ -76,7 +76,7 @@ router.get('/:company_id', function (req, res) {
  *    security:
  *      - okta: []
  *    tags:
- *      - users
+ *      - user
  *    requestBody:
  *      description: user object to to be added (minus id, foreign keys represented by integers or uuid)
  *      content:
@@ -137,7 +137,7 @@ router.post('/:company_id/users?', companyIdCheck, function (req, res) {
  *    security:
  *      - okta: []
  *    tags:
- *      - users
+ *      - user
  *    parameters:
  *      - $ref: '#/components/parameters/companyId'
  *      - $ref: '#/components/parameters/userId'
@@ -159,7 +159,7 @@ router.post('/:company_id/users?', companyIdCheck, function (req, res) {
  *    security:
  *      - okta: []
  *    tags:
- *      - users
+ *      - user
  *    requestBody:
  *      description: user object to to be updated or a portion
  *      content:
@@ -246,7 +246,7 @@ router
  *    security:
  *      - okta: []
  *    tags:
- *      - users
+ *      - user
  *    parameters:
  *      - $ref: '#/components/parameters/code'
  *    requestBody:
@@ -278,7 +278,7 @@ router
  *    security:
  *      - okta: []
  *    tags:
- *      - users
+ *      - user
  *      - company
  *    requestBody:
  *      description: user and company objects to to be added
@@ -310,7 +310,7 @@ router
  *    security:
  *      - okta: []
  *    tags:
- *      - users
+ *      - user
  *    parameters:
  *      - $ref: '#/components/parameters/userId'
  *      - $ref: '#/components/parameters/code'

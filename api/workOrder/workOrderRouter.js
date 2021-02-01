@@ -8,12 +8,11 @@ const router = express.Router({ mergeParams: true });
  * /company/{companyId}/orders:
  *  get:
  *    description: Returns a list of workOrders associated with the company
- *    summary: Get a list of workOrders associated with the company limited by user
+ *    summary: Get a list of workOrders associated with the company
  *    security:
  *      - okta: []
  *    tags:
  *      - workOrder
- *      - order
  *      - company
  *    parameters:
  *      - $ref: '#/components/parameters/companyId'
@@ -25,7 +24,7 @@ const router = express.Router({ mergeParams: true });
  *            schema:
  *              type: array
  *              items:
- *                $ref: '#/components/schemas/workOrder'
+ *                $ref: '#/components/schemas/workOrder_full'
  *      401:
  *        $ref: '#/components/responses/UnauthorizedError'
  *      403:
@@ -43,7 +42,7 @@ const router = express.Router({ mergeParams: true });
  *      content:
  *        application/json:
  *          schema:
- *            $ref: '#/components/schemas/workOrder'
+ *            $ref: '#/components/schemas/workOrder_new'
  *    parameters:
  *      - $ref: '#/components/parameters/companyId'
  *    responses:
@@ -65,7 +64,7 @@ const router = express.Router({ mergeParams: true });
  *                  description: A message about the result
  *                  example: workOrder created
  *                workOrder:
- *                  $ref: '#/components/schemas/workOrder'
+ *                  $ref: '#/components/schemas/workOrder_short'
  */
 router
   .route('/')
@@ -135,7 +134,6 @@ router
  *      - okta: []
  *    tags:
  *      - workOrder
- *      - order
  *    parameters:
  *      - $ref: '#/components/parameters/companyId'
  *      - $ref: '#/components/parameters/workOrderId'
@@ -145,7 +143,7 @@ router
  *        content:
  *          application/json:
  *            schema:
- *              $ref: '#/components/schemas/workOrder'
+ *              $ref: '#/components/schemas/workOrder_full'
  *      401:
  *        $ref: '#/components/responses/UnauthorizedError'
  *      404:
@@ -156,13 +154,12 @@ router
  *      - okta: []
  *    tags:
  *      - workOrder
- *      - order
  *    requestBody:
  *      description: WorkOrder object to to be updated or portion
  *      content:
  *        application/json:
  *          schema:
- *            $ref: '#/components/schemas/workOrder'
+ *            $ref: '#/components/schemas/workOrder_new'
  *    parameters:
  *      - $ref: '#/components/parameters/companyId'
  *      - $ref: '#/components/parameters/workOrderId'
@@ -183,14 +180,13 @@ router
  *                  description: A message about the result
  *                  example: workOrder updated
  *                workOrder:
- *                  $ref: '#/components/schemas/workOrder'
+ *                  $ref: '#/components/schemas/workOrder_short'
  *  delete:
  *    summary: Remove a workOrder
  *    security:
  *      - okta: []
  *    tags:
  *      - workOrder
- *      - order
  *    parameters:
  *      - $ref: '#/components/parameters/companyId'
  *      - $ref: '#/components/parameters/workOrderId'
@@ -211,7 +207,7 @@ router
  *                  description: A message about the result
  *                  example: WorkOrder 3 was deleted.
  *                workOrder:
- *                  $ref: '#/components/schemas/workOrder'
+ *                  $ref: '#/components/schemas/workOrder_short'
  */
 router.put(['/', '/:workOrderId'], authRequired, function (req, res) {
   const workOrder = req.body;
@@ -302,7 +298,6 @@ router
  *      - okta: []
  *    tags:
  *      - workOrder
- *      - order
  *      - comment
  *    parameters:
  *      - $ref: '#/components/parameters/companyId'
@@ -325,7 +320,6 @@ router
  *      - okta: []
  *    tags:
  *      - workOrder
- *      - order
  *      - comment
  *    requestBody:
  *      description: Comment to be added
@@ -388,7 +382,6 @@ router
  *      - okta: []
  *    tags:
  *      - workOrder
- *      - order
  *      - comment
  *    parameters:
  *      - $ref: '#/components/parameters/companyId'
@@ -419,7 +412,6 @@ router
  *      - okta: []
  *    tags:
  *      - workOrder
- *      - order
  *      - comment
  *    responses:
  *      401:
@@ -486,7 +478,6 @@ router
  *      - okta: []
  *    tags:
  *      - workOrder
- *      - order
  *      - image
  *    parameters:
  *      - $ref: '#/components/parameters/companyId'
@@ -509,7 +500,6 @@ router
  *      - okta: []
  *    tags:
  *      - workOrder
- *      - order
  *      - image
  *    requestBody:
  *      description: Image to be added
@@ -575,7 +565,6 @@ router
  *      - okta: []
  *    tags:
  *      - workOrder
- *      - order
  *      - image
  *    parameters:
  *      - $ref: '#/components/parameters/companyId'
@@ -624,7 +613,7 @@ module.exports = router;
  * components:
  *  parameters:
  *    workOrderId:
- *      name: id
+ *      name: workOrderId
  *      in: path
  *      description: ID of the workOrder to return
  *      required: true
@@ -632,23 +621,23 @@ module.exports = router;
  *      schema:
  *        type: integer
  *    companyId:
- *      name: id
+ *      name: companyId
  *      in: path
- *      description: ID of the company to search for workOrders
+ *      description: ID of the company
  *      required: true
  *      example: 1
  *      schema:
  *        type: integer
  *    userId:
- *      name: id
+ *      name: userId
  *      in: path
  *      description: ID of the user to return
  *      required: true
- *      example: 1
+ *      example: 'd376de0577681ca93614'
  *      schema:
- *        type: integer
+ *        type: string
  *    propertyId:
- *      name: id
+ *      name: propertyId
  *      in: path
  *      description: ID of the property to return
  *      required: true
@@ -664,7 +653,7 @@ module.exports = router;
  *      schema:
  *        type: string
  *    commentId:
- *      name: id
+ *      name: commentId
  *      in: path
  *      description: ID of the comment
  *      required: true
@@ -672,7 +661,7 @@ module.exports = router;
  *      schema:
  *        type: integer
  *    imageId:
- *      name: id
+ *      name: imageId
  *      in: path
  *      description: ID of the image
  *      required: true
@@ -792,7 +781,14 @@ module.exports = router;
  *      items:
  *        $ref: '#/components/schemas/image'
  *      example:
- *        [$ref: '#/components/schemas/image/example', $ref: '#/components/schemas/image/example2']
+ *          - id: 1
+ *            url: 'http://path/to/image'
+ *            user: '00ulthapbErVUwVJy4x6'
+ *            workOrder: 1
+ *          - id: 2
+ *            url: 'http://path/to/image'
+ *            user: '00ulthapbErVUwVJy4x6'
+ *            workOrder: 1
  *    comment:
  *      type: object
  *      properties:
@@ -802,12 +798,21 @@ module.exports = router;
  *        comment:
  *          type: string
  *          description: The body of the comment
- *        user:
+ *        author:
  *          type: string
  *          description: The userId of the user who wrote the comment
+ *        name:
+ *          type: string
+ *          description: the name of the user who wrote the comment
  *        workOrder:
  *          type: integer
  *          description: the id of the workOrder on which the comment is made
+ *      example:
+ *        id: 1
+ *        comment: 'Still waiting for the part. It should be in by Monday.'
+ *        workOrder: 1
+ *        author: '00ulthapbErVUwVJy4x6'
+ *        name: 'Test001 User'
  *    comments:
  *      type: array
  *      description: an array of comment objects
@@ -839,7 +844,7 @@ module.exports = router;
  *      example:
  *        id: 1
  *        name: 'Unassigned'
- *    workOrder:
+ *    workOrder_full:
  *      type: object
  *      properties:
  *        id:
@@ -852,8 +857,10 @@ module.exports = router;
  *          description: an explanation of what needs done
  *        created_at:
  *          type: timestamp
+ *          description: added by server
  *        updated_at:
  *          type: timestamp
+ *          description: added by server
  *        company:
  *          $ref: '#/components/schemas/company'
  *        property:
@@ -864,12 +871,11 @@ module.exports = router;
  *          $ref: '#/components/schemas/comments'
  *        createdBy:
  *          type: string
- *          description: This is a foreign key to Profiles.id (Okta Id)
+ *          description: This is a reference to a userId (Okta Id)
  *        assignedTo:
  *          type: string
  *          description:
- *            This is a foreign key to Profiles.id (Okta Id). By default it is
- *            set to the same user as 'createdBy'
+ *            This is a reference to a userId
  *        priority:
  *          $ref: '#/components/schemas/priority'
  *        status:
@@ -899,9 +905,98 @@ module.exports = router;
  *        createdBy: '00ulthapbErVUwVJy4x6'
  *        assignedTo: '00ulthapbErVUwVJy4x6'
  *        priority:
- *            $ref: '#/components/schemas/priority/example'
+ *          id: 2
+ *          name: 'High'
+ *          color: '#F7931B'
  *        status:
- *            $ref: '#/components/schemas/status/example'
+ *          id: 1
+ *          name: 'Unassigned'
  *        created_at: '2020-12-15T22:46:05.962Z'
  *        updated_at: '2020-12-15T22:46:05.962Z'
+ *    workOrder_short:
+ *      type: object
+ *      properties:
+ *        id:
+ *          type: integer
+ *          description: autoincrements
+ *        title:
+ *          type: string
+ *        description:
+ *          type: string
+ *          description: an explanation of what needs done
+ *        created_at:
+ *          type: timestamp
+ *          description: added by server
+ *        updated_at:
+ *          type: timestamp
+ *          description: added by server
+ *        company:
+ *          type: integer
+ *          description: a reference to a companyId
+ *        property:
+ *          type: integer
+ *          description: a reference to a propertyId
+ *        createdBy:
+ *          type: string
+ *          description: This is a reference to a userId (Okta Id)
+ *        assignedTo:
+ *          type: string
+ *          description:
+ *            This is a reference to a userId (Okta Id)
+ *        priority:
+ *          type: integer
+ *          description: a reference to a priorityId
+ *        status:
+ *          type: integer
+ *          description: a reference to a statusId
+ *      example:
+ *        id: 1
+ *        title: 'Broken Radiator Thermostat'
+ *        description:
+ *          'Radiator Thermo in Apt 224 is broken. Probably needs replaced.'
+ *        company: 1
+ *        property: 1
+ *        createdBy: '00ulthapbErVUwVJy4x6'
+ *        assignedTo: '00ulthapbErVUwVJy4x6'
+ *        priority: 2
+ *        status: 1
+ *        created_at: '2020-12-15T22:46:05.962Z'
+ *        updated_at: '2020-12-15T22:46:05.962Z'
+ *    workOrder_new:
+ *      type: object
+ *      properties:
+ *        title:
+ *          type: string
+ *        description:
+ *          type: string
+ *          description: an explanation of what needs done
+ *        company:
+ *          type: integer
+ *          description: a reference to a companyId
+ *        property:
+ *          type: integer
+ *          description: a reference to a propertyId
+ *        createdBy:
+ *          type: string
+ *          description: This is a reference to a userId (Okta Id)
+ *        assignedTo:
+ *          type: string
+ *          description:
+ *            This is a reference to a userId (Okta Id)
+ *        priority:
+ *          type: integer
+ *          description: a reference to a priorityId
+ *        status:
+ *          type: integer
+ *          description: a reference to a statusId
+ *      example:
+ *        title: 'Broken Radiator Thermostat'
+ *        description:
+ *          'Radiator Thermo in Apt 224 is broken. Probably needs replaced.'
+ *        company: 1
+ *        property: 1
+ *        createdBy: '00ulthapbErVUwVJy4x6'
+ *        assignedTo: '00ulthapbErVUwVJy4x6'
+ *        priority: 2
+ *        status: 1
  */
