@@ -15,6 +15,8 @@ const router = express.Router({ mergeParams: true });
  *      - workOrder
  *      - order
  *      - company
+ *    parameters:
+ *      - $ref: '#/components/parameters/companyId'
  *    responses:
  *      200:
  *        description: array of workOrders
@@ -42,6 +44,8 @@ const router = express.Router({ mergeParams: true });
  *        application/json:
  *          schema:
  *            $ref: '#/components/schemas/workOrder'
+ *    parameters:
+ *      - $ref: '#/components/parameters/companyId'
  *    responses:
  *      400:
  *        $ref: '#/components/responses/BadRequest'
@@ -133,6 +137,7 @@ router
  *      - workOrder
  *      - order
  *    parameters:
+ *      - $ref: '#/components/parameters/companyId'
  *      - $ref: '#/components/parameters/workOrderId'
  *    responses:
  *      200:
@@ -158,6 +163,9 @@ router
  *        application/json:
  *          schema:
  *            $ref: '#/components/schemas/workOrder'
+ *    parameters:
+ *      - $ref: '#/components/parameters/companyId'
+ *      - $ref: '#/components/parameters/workOrderId'
  *    responses:
  *      401:
  *        $ref: '#/components/responses/UnauthorizedError'
@@ -184,6 +192,7 @@ router
  *      - workOrder
  *      - order
  *    parameters:
+ *      - $ref: '#/components/parameters/companyId'
  *      - $ref: '#/components/parameters/workOrderId'
  *    responses:
  *      401:
