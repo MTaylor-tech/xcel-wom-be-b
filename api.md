@@ -37,14 +37,14 @@
   - PUT: update the user (returns msg & updated user)
   - DELETE: remove specified user (returns msg)
 - **_Still awaiting review & merge:_**
-- `/company/user/{code}`
-  - POST: creates a new user, putting them into the company and role specified by the code
-- `/company/new`
-  - POST: expects `req.body` to contain both a user object and a company object. Creates the company, creates the user, adding the user as the 'Admin' of the new company. (I didn't know what path to put this on, so it can be changed if the team thinks of a better endpoint. Aside: we should review all the endpoints after the functionality is finalized and make sure they are useful labels.)
-- `/company/user/{userId}/{code}`
-  - PUT: adds the user with the specified userId to the company and role associated with the code.
+  - `/company/user/{code}`
+    - POST: creates a new user, putting them into the company and role specified by the code
+  - `/company/new`
+    - POST: expects `req.body` to contain both a user object and a company object. Creates the company, creates the user, adding the user as the 'Admin' of the new company. (I didn't know what path to put this on, so it can be changed if the team thinks of a better endpoint. Aside: we should review all the endpoints after the functionality is finalized and make sure they are useful labels.)
+  - `/company/user/{userId}/{code}`
+    - PUT: adds the user with the specified userId to the company and role associated with the code.
 
-### Company Router:
+### Companies Router:
 
 `/companies`
 

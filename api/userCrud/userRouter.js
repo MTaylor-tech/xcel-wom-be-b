@@ -285,8 +285,8 @@ router
  *      content:
  *        application/json:
  *          schema:
- *            $ref: '#/components/schemas/user'
- *            $ref: '#/components/schemas/company'
+ *            - $ref: '#/components/schemas/user'
+ *            - $ref: '#/components/schemas/company'
  *    responses:
  *      200:
  *        description: the new user object
