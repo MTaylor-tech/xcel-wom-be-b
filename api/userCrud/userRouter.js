@@ -163,6 +163,91 @@ router.post('/:company_id/user', companyIdCheck, function (req, res) {
 
 /**
  * @swagger
+ * /company/user/{code}:
+ *  post:
+ *    description: add a user
+ *    summary: add a user
+ *    security:
+ *      - okta: []
+ *    tags:
+ *      - users
+ *    requestBody:
+ *      description: user object to to be added (minus id, foreign keys represented by integers or uuid)
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/user'
+ *    responses:
+ *      200:
+ *        description: the new user object
+ *        content:
+ *          application/json:
+ *             $ref: '#/components/schemas/user'
+ *      401:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      403:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      500:
+ *        $ref: '#/components/responses/NotFound'
+ */
+router.post('/user/:code', function (req, res) {
+  userModel
+    .createUserWithCode(req.body, req.params.code)
+    .then((user) => {
+      res.status(200).json(user);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ message: 'Something went wrong', err });
+    });
+});
+
+/**
+ * @swagger
+ * /company/new:
+ *  post:
+ *    description: create a company and add a user
+ *    summary: create a company and add a user
+ *    security:
+ *      - okta: []
+ *    tags:
+ *      - users
+ *      - company
+ *    requestBody:
+ *      description: user object to to be added (minus id, foreign keys represented by integers or uuid)
+ *      content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/user'
+ *    responses:
+ *      200:
+ *        description: the new user object
+ *        content:
+ *          application/json:
+ *             $ref: '#/components/schemas/user'
+ *      401:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      403:
+ *        $ref: '#/components/responses/UnauthorizedError'
+ *      500:
+ *        $ref: '#/components/responses/NotFound'
+ */
+router.post('/new', function (req, res) {
+  const createUser = req.body.user;
+  const createCompany = req.body.company;
+  userModel
+    .createUserNewCompany(createUser, createCompany)
+    .then((user) => {
+      res.status(200).json(user);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ message: 'Something went wrong', err });
+    });
+});
+
+/**
+ * @swagger
  * /company/user/{userId}:
  *  post:
  *    description: update a user
@@ -197,6 +282,18 @@ router.put('/user/:user_id', userIdCheck, function (req, res) {
     .updateProfile(updates, req.params.user_id)
     .then((user) => {
       res.status(200).json({ message: req.body, user });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ message: 'Unable to update', err });
+    });
+});
+
+router.put('/user/:user_id/:code', userIdCheck, function (req, res) {
+  userModel
+    .assignUser(req.params.user_id, req.params.code)
+    .then((user) => {
+      res.status(200).json({ message: 'User added.', user });
     })
     .catch((err) => {
       console.log(err);
