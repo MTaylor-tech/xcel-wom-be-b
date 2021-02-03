@@ -55,18 +55,20 @@ const checkCode = async (code) => {
   if (found) {
     console.log(`Found ${code}`);
     console.log(found);
+    return true;
   } else {
     console.log(`No ${code}`);
+    return false;
   }
-  return found;
 };
 
-const genCode = (length) => {
+const genCode = async (length) => {
   let code = '';
   for (let x = 1; x <= length; x++) {
     code += alpha[Math.floor(Math.random() * (alpha.length - 1))];
   }
-  if (checkCode(code)) {
+  const found = await checkCode(code);
+  if (found) {
     // if the code is in the DB, we need a new one
     return genCode(length);
   } else {
