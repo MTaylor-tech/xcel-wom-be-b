@@ -109,7 +109,7 @@ router
             await WorkOrders.create(workOrder).then((workOrder) =>
               res
                 .status(200)
-                .json({ message: 'workOrder created', workOrder: workOrder[0] })
+                .json({ message: 'workOrder created', workOrder: workOrder })
             );
           } else {
             res.status(400).json({ message: 'workOrder already exists' });
