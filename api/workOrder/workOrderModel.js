@@ -131,15 +131,17 @@ const findById = async (workOrderId) => {
 };
 
 const create = async (workOrder) => {
-  return db('workOrders').insert(workOrder).returning('*');
+  const id = await db('workOrders').insert(workOrder).returning('id');
+  return findById(parseInt(id));
 };
 
-const update = (id, workOrder) => {
-  return db('workOrders')
+const update = async (id, workOrder) => {
+  const new_id = await db('workOrders')
     .where({ id: id })
     .first()
     .update(workOrder)
-    .returning('*');
+    .returning('id');
+  return findById(parseInt(new_id));
 };
 
 const remove = async (id) => {
